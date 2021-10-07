@@ -16,6 +16,9 @@ public enum MessageType {
     //设备离线
     OFFLINE(DeviceOfflineMessage::new),
 
+    //注册
+    REGISTER(DeviceRegisterMessage::new),
+
     //设备上线
     ONLINE(DeviceOnlineMessage::new),
 

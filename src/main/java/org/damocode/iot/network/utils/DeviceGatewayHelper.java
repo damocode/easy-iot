@@ -4,10 +4,7 @@ import lombok.AllArgsConstructor;
 import org.apache.commons.lang.StringUtils;
 import org.damocode.iot.core.device.DeviceOperator;
 import org.damocode.iot.core.device.DeviceOperatorManager;
-import org.damocode.iot.core.message.DeviceMessage;
-import org.damocode.iot.core.message.DeviceOfflineMessage;
-import org.damocode.iot.core.message.DeviceOnlineMessage;
-import org.damocode.iot.core.message.Headers;
+import org.damocode.iot.core.message.*;
 import org.damocode.iot.core.server.DecodedClientMessageHandler;
 import org.damocode.iot.core.server.session.DeviceSession;
 import org.damocode.iot.core.server.session.DeviceSessionManager;
@@ -43,19 +40,21 @@ public class DeviceGatewayHelper {
         };
     }
 
-    public void handleDeviceMessage(DeviceMessage message, Function<DeviceOperator,DeviceSession> sessionBuilder, Consumer<DeviceSession> sessionConsumer) {
+    public DeviceOperator handleDeviceMessage(DeviceMessage message, Function<DeviceOperator,DeviceSession> sessionBuilder, Consumer<DeviceSession> sessionConsumer) {
         String deviceId = message.getDeviceId();
         boolean doHandle = true;
         if (StringUtils.isEmpty(deviceId)) {
-            return;
+            return null;
         }
         if (message instanceof DeviceOfflineMessage) {
             //设备离线消息
             DeviceSession session = sessionManager.unregister(deviceId);
+            DeviceOperator operator = deviceOperatorManager.getDevice(deviceId);
             if(session == null){
                 //如果session不存在,则将离线消息转发
+                messageHandler.handleMessage(operator,message);
             }
-            return;
+            return operator;
         } else if (message instanceof DeviceOnlineMessage){
             doHandle = false;
         }
@@ -73,7 +72,11 @@ public class DeviceGatewayHelper {
                 sessionManager.register(newSession);
                 sessionConsumer.accept(newSession);
                 newSession.keepAlive();
+                if (!(message instanceof DeviceRegisterMessage) && !(message instanceof DeviceOnlineMessage)) {
+                    messageHandler.handleMessage(deviceOperator,message);
+                }
             }
+            return deviceOperator;
         } else {
             //消息中指定保存在线
             if (message.getHeader(Headers.keepOnline).orElse(false) && !(session instanceof KeepOnlineSession)) {
@@ -86,9 +89,10 @@ public class DeviceGatewayHelper {
             }
             sessionConsumer.accept(session);
             session.keepAlive();
-        }
-        if(doHandle){
-//            messageHandler.handleMessage(message);
+            if(doHandle){
+                messageHandler.handleMessage(session.getOperator(), message);
+            }
+            return deviceOperatorManager.getDevice(deviceId);
         }
     }
 
