@@ -7,8 +7,9 @@
   <groupId>org.damocode</groupId>
   <artifactId>easy-iot</artifactId>
   <version>1.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
 
-  <name>easy-iot</name>
+  <name>${artifactId}</name>
   <url>http://www.damocode.vip</url>
 
   <properties>
@@ -17,7 +18,7 @@
     <java.version>1.8</java.version>
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
-    <maven.compiler.plugin>3.8.1</maven.compiler.plugin>
+    <maven.compiler.plugin.version>3.8.1</maven.compiler.plugin.version>
 
     <vertx.version>4.0.0</vertx.version>
     <rxjava.version>1.3.8</rxjava.version>
@@ -97,6 +98,20 @@
   </dependencies>
 
   <build>
+    <finalName>${artifactId}</finalName>
+    <plugins>
 
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>${maven.compiler.plugin.version}</version>
+        <configuration>
+          <source>${maven.compiler.source}</source>
+          <target>${maven.compiler.target}</target>
+          <encoding>${project.build.sourceEncoding}</encoding>
+        </configuration>
+      </plugin>
+
+    </plugins>
   </build>
 </project>
