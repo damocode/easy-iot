@@ -29,7 +29,20 @@ TcpServerProperties properties = TcpServerProperties.builder()
 ```
 - 编写解析协议
 
+   实现DeviceMessageCodec接口
+
 - 保存接收过来的数据
+  
+   实现DecodedClientMessageHandler接口
+
+- 其他重要类或接口：
+
+   DeviceOperatorManager 设备操作管理器 
+  
+   IDeviceOperatorService 设备状态操作接口，更新设备状态及获取设备状态
+
+   DefaultDeviceSessionManager 设备会话管理器（easy-iot-spring-boot-starter）
+
 
 # 最佳实现
 
