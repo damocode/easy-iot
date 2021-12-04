@@ -1,5 +1,7 @@
 # 介绍
 
+ **easy-iotQQ开发交流群：51443279** 
+
 easy-iot是一款轻量级物联网开发的sdk，开发人员通过如下三步就能够快速轻松实现设备的数据接入，设备控制（给设备发送指令）以及设备的状态管理（在线、离线等）等功能。
 - 创建网络组件及设备网关
 
@@ -63,3 +65,6 @@ TcpServerProperties properties = TcpServerProperties.builder()
 [spring boot快速集成easy-iot物联网组件](https://gitee.com/damocode/easy-iot-spring-boot-starter)
 
 [参考物联网快速接入demo](https://gitee.com/damocode/easy-iot-demo)
+
+
+## 你的 `Star` 是我开发的动力

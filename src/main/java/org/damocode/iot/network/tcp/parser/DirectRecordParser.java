@@ -9,7 +9,7 @@ import rx.subjects.PublishSubject;
  * @Date: 2021/10/7 15:00
  * @Version: 1.0.0
  */
-public class DirectRecordParser implements PayloadParser{
+public class DirectRecordParser implements PayloadParser {
 
     PublishSubject<Buffer> processor = PublishSubject.create();
 

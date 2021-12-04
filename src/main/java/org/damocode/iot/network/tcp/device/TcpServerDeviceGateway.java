@@ -5,10 +5,10 @@ import org.damocode.iot.core.device.DeviceOperator;
 import org.damocode.iot.core.device.DeviceOperatorManager;
 import org.damocode.iot.core.message.DeviceMessage;
 import org.damocode.iot.core.message.Message;
-import org.damocode.iot.core.message.codec.DeviceMessageCodec;
-import org.damocode.iot.core.message.codec.EncodedMessage;
-import org.damocode.iot.core.message.codec.FromDeviceMessageContext;
+import org.damocode.iot.core.message.codec.*;
+import org.damocode.iot.core.protocol.ProtocolSupport;
 import org.damocode.iot.core.server.DecodedClientMessageHandler;
+import org.damocode.iot.core.server.DeviceGatewayContext;
 import org.damocode.iot.core.server.session.DeviceSession;
 import org.damocode.iot.core.server.session.DeviceSessionManager;
 import org.damocode.iot.network.tcp.TcpMessage;
@@ -37,7 +37,7 @@ public class TcpServerDeviceGateway {
 
     private final TcpServer tcpServer;
 
-    private final DeviceMessageCodec deviceMessageCodec;
+    private final ProtocolSupport protocolSupport;
 
     private final DeviceOperatorManager deviceOperatorManager;
 
@@ -49,15 +49,27 @@ public class TcpServerDeviceGateway {
 
     Subscription subscription;
 
-    public TcpServerDeviceGateway(TcpServer tcpServer, DeviceSessionManager sessionManager, DeviceMessageCodec deviceMessageCodec, DeviceOperatorManager deviceOperatorManager, DecodedClientMessageHandler messageHandler){
+    public TcpServerDeviceGateway(TcpServer tcpServer, DeviceSessionManager sessionManager, ProtocolSupport protocolSupport, DeviceOperatorManager deviceOperatorManager, DecodedClientMessageHandler messageHandler){
         this.tcpServer = tcpServer;
-        this.deviceMessageCodec = deviceMessageCodec;
+        this.protocolSupport = protocolSupport;
         this.deviceOperatorManager = deviceOperatorManager;
         this.helper = new DeviceGatewayHelper(deviceOperatorManager,sessionManager,messageHandler);
     }
 
+    public Transport getTransport() {
+        return DefaultTransport.TCP;
+    }
+
     public void startup() {
         doStart();
+    }
+
+    public void shutdown() {
+        started.set(false);
+        this.subject.onCompleted();
+        if (this.subscription != null) {
+            this.subscription.unsubscribe();
+        }
     }
 
     private void doStart() {
@@ -75,7 +87,7 @@ public class TcpServerDeviceGateway {
         return subject;
     }
 
-    class TcpConnection {
+    class TcpConnection implements DeviceGatewayContext {
 
         final TcpClient client;
         //消息订阅
@@ -92,7 +104,7 @@ public class TcpServerDeviceGateway {
                 subscription.unsubscribe();
             });
             //通过客户端id获取设备会话
-            DeviceSession session = new UnknownTcpDeviceSession(client.getId(),client,deviceMessageCodec) {
+            DeviceSession session = new UnknownTcpDeviceSession(client.getId(),client,protocolSupport,getTransport()) {
                 @Override
                 public Boolean send(EncodedMessage encodedMessage) {
                     return super.send(encodedMessage);
@@ -129,10 +141,12 @@ public class TcpServerDeviceGateway {
         }
 
         void handleTcpMessage(TcpMessage message) {
-            if(deviceMessageCodec == null){
+            protocolSupport.onClientConnect(getTransport(),client,this);
+            DeviceMessageCodec codec = protocolSupport.getMessageCodec(getTransport());
+            if(codec == null){
                 return;
             }
-            DeviceMessage deviceMessage = deviceMessageCodec.decode(FromDeviceMessageContext.of(sessionRef.get(), message));
+            DeviceMessage deviceMessage = codec.decode(FromDeviceMessageContext.of(sessionRef.get(), message));
             if(deviceMessage == null) {
                 return;
             }
@@ -143,7 +157,7 @@ public class TcpServerDeviceGateway {
             if(subject.hasObservers()){
                 subject.onNext(message);
             }
-            Function<DeviceOperator, DeviceSession> sessionBuilder = device -> new TcpDeviceSession(device,client,deviceMessageCodec);
+            Function<DeviceOperator, DeviceSession> sessionBuilder = device -> new TcpDeviceSession(device,client,protocolSupport,getTransport());
             Consumer<DeviceSession> sessionConsumer = DeviceGatewayHelper.applySessionKeepaliveTimeout(message,keepaliveTimeout::get);
             sessionConsumer.andThen(session -> {
                 TcpDeviceSession deviceSession = session.unwrap(TcpDeviceSession.class);
@@ -151,6 +165,16 @@ public class TcpServerDeviceGateway {
                 sessionRef.set(deviceSession);
             });
             helper.handleDeviceMessage(message,sessionBuilder,sessionConsumer);
+        }
+
+        @Override
+        public DeviceOperator getDevice(String deviceId) {
+            return deviceOperatorManager.getDevice(deviceId);
+        }
+
+        @Override
+        public void onMessage(DeviceMessage message) {
+            handleDeviceMessage(message);
         }
     }
 

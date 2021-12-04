@@ -1,6 +1,7 @@
 package org.damocode.iot.core.message;
 
 import lombok.AllArgsConstructor;
+import org.damocode.iot.core.message.property.ReportPropertyMessage;
 
 import java.util.function.Supplier;
 
@@ -12,6 +13,9 @@ import java.util.function.Supplier;
  */
 @AllArgsConstructor
 public enum MessageType {
+
+    //上报设备属性
+    REPORT_PROPERTY(ReportPropertyMessage::new),
 
     //设备离线
     OFFLINE(DeviceOfflineMessage::new),

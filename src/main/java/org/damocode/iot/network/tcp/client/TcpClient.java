@@ -1,5 +1,6 @@
 package org.damocode.iot.network.tcp.client;
 
+import org.damocode.iot.core.server.ClientConnection;
 import org.damocode.iot.network.Network;
 import org.damocode.iot.network.tcp.TcpMessage;
 import rx.subjects.PublishSubject;
@@ -13,7 +14,7 @@ import java.time.Duration;
  * @Date: 2021/10/7 14:56
  * @Version: 1.0.0
  */
-public interface TcpClient extends Network {
+public interface TcpClient extends Network, ClientConnection {
 
     /**
      * 获取客户端远程地址

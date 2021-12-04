@@ -5,6 +5,8 @@ import lombok.Setter;
 import org.damocode.iot.core.device.DeviceOperator;
 import org.damocode.iot.core.message.codec.DeviceMessageCodec;
 import org.damocode.iot.core.message.codec.EncodedMessage;
+import org.damocode.iot.core.message.codec.Transport;
+import org.damocode.iot.core.protocol.ProtocolSupport;
 import org.damocode.iot.core.server.session.DeviceSession;
 import org.damocode.iot.network.tcp.TcpMessage;
 import org.damocode.iot.network.tcp.client.TcpClient;
@@ -30,16 +32,20 @@ public class TcpDeviceSession implements DeviceSession {
     private TcpClient client;
 
     @Getter
-    private final DeviceMessageCodec deviceMessageCodec;
+    private final ProtocolSupport protocolSupport;
+
+    @Getter
+    private final Transport transport;
 
     private long lastPingTime = System.currentTimeMillis();
 
     private final long connectTime = System.currentTimeMillis();
 
-    TcpDeviceSession(DeviceOperator operator,TcpClient client,DeviceMessageCodec deviceMessageCodec) {
+    TcpDeviceSession(DeviceOperator operator,TcpClient client,ProtocolSupport protocolSupport,Transport transport) {
         this.operator = operator;
         this.client = client;
-        this.deviceMessageCodec = deviceMessageCodec;
+        this.protocolSupport = protocolSupport;
+        this.transport = transport;
     }
 
     @Override

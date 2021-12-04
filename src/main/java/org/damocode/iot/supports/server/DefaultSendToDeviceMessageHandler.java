@@ -9,6 +9,7 @@ import org.damocode.iot.core.message.*;
 import org.damocode.iot.core.message.codec.DeviceMessageCodec;
 import org.damocode.iot.core.message.codec.EncodedMessage;
 import org.damocode.iot.core.message.codec.ToDeviceMessageContext;
+import org.damocode.iot.core.protocol.ProtocolSupport;
 import org.damocode.iot.core.server.DecodedClientMessageHandler;
 import org.damocode.iot.core.server.MessageHandler;
 import org.damocode.iot.core.server.session.DeviceSession;

@@ -2,6 +2,7 @@ package org.damocode.iot.network.tcp.server;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.net.NetServer;
+import io.vertx.core.net.NetServerOptions;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -23,6 +24,9 @@ public class TcpServerProvider {
     }
 
     public VertxTcpServer createNetwork(TcpServerProperties properties) {
+        if(properties.getOptions() == null){
+            properties.setOptions(new NetServerOptions());
+        }
         VertxTcpServer tcpServer = new VertxTcpServer(properties.getId());
         initTcpServer(tcpServer, properties);
         return tcpServer;

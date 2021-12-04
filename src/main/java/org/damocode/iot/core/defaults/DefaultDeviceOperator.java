@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.damocode.iot.core.device.*;
 import org.damocode.iot.core.message.DisconnectDeviceMessage;
+import org.damocode.iot.core.protocol.ProtocolSupport;
 
 import java.util.Collections;
 import java.util.Date;
@@ -33,11 +34,16 @@ public class DefaultDeviceOperator implements DeviceOperator {
 
     private final DeviceOperatorInfo operatorInfo;
 
-    public DefaultDeviceOperator(String id,DeviceOperationBroker handler,IDeviceOperatorService deviceOperatorService) {
+    public DefaultDeviceOperator(String id,
+                                 DeviceOperationBroker handler,
+                                 IDeviceOperatorService deviceOperatorService) {
         this(id,handler,deviceOperatorService,DEFAULT_STATE_CHECKER);
     }
 
-    public DefaultDeviceOperator(String id,DeviceOperationBroker handler,IDeviceOperatorService deviceOperatorService,DeviceStateChecker deviceStateChecker) {
+    public DefaultDeviceOperator(String id,
+                                 DeviceOperationBroker handler,
+                                 IDeviceOperatorService deviceOperatorService,
+                                 DeviceStateChecker deviceStateChecker) {
         this.id = id;
         this.handler = handler;
         this.messageSender = new DefaultDeviceMessageSender(handler,this);
@@ -53,33 +59,51 @@ public class DefaultDeviceOperator implements DeviceOperator {
 
     @Override
     public String getConnectionServerId() {
+        if(operatorInfo == null){
+            return null;
+        }
         return operatorInfo.getServerId();
     }
 
     @Override
     public String getSessionId() {
+        if(operatorInfo == null){
+            return null;
+        }
         return operatorInfo.getSessionId();
     }
 
     @Override
     public String getAddress() {
+        if(operatorInfo == null){
+            return null;
+        }
         return operatorInfo.getAddress();
     }
 
     @Override
     public Boolean putState(byte state) {
+        if(operatorInfo == null){
+            return false;
+        }
         operatorInfo.setState(state);
         return deviceOperatorService.updateByDeviceId(operatorInfo);
     }
 
     @Override
     public Byte getState() {
+        if(operatorInfo == null){
+            return DeviceState.unknown;
+        }
         return Optional.ofNullable(operatorInfo.getState())
                 .orElse(DeviceState.unknown);
     }
 
     @Override
     public Byte checkState() {
+        if(operatorInfo == null){
+            return DeviceState.unknown;
+        }
         Byte newer = stateChecker.checkState(this);
         if(newer == null){
             newer = DEFAULT_STATE_CHECKER.checkState(this);
@@ -104,6 +128,9 @@ public class DefaultDeviceOperator implements DeviceOperator {
 
     @Override
     public Boolean online(String serverId, String sessionId, String address) {
+        if(operatorInfo == null){
+            return false;
+        }
         operatorInfo.setServerId(serverId);
         operatorInfo.setSessionId(sessionId);
         operatorInfo.setAddress(address);
@@ -114,6 +141,9 @@ public class DefaultDeviceOperator implements DeviceOperator {
 
     @Override
     public Boolean offline() {
+        if(operatorInfo == null){
+            return false;
+        }
         operatorInfo.setServerId("");
         operatorInfo.setSessionId("");
         operatorInfo.setState(DeviceState.offline);

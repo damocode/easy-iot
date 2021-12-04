@@ -1,10 +1,13 @@
 package org.damocode.iot.core.server.session;
 
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Setter;
 import org.damocode.iot.core.device.DeviceOperator;
 import org.damocode.iot.core.message.codec.DeviceMessageCodec;
 import org.damocode.iot.core.message.codec.EncodedMessage;
+import org.damocode.iot.core.message.codec.Transport;
+import org.damocode.iot.core.protocol.ProtocolSupport;
 
 import java.net.InetSocketAddress;
 import java.time.Duration;
@@ -65,6 +68,16 @@ public class KeepOnlineSession implements DeviceSession, ReplaceableDeviceSessio
     }
 
     @Override
+    public ProtocolSupport getProtocolSupport() {
+        return parent.getProtocolSupport();
+    }
+
+    @Override
+    public Transport getTransport() {
+        return parent.getTransport();
+    }
+
+    @Override
     public void close() {
         parent.close();
     }
@@ -106,11 +119,6 @@ public class KeepOnlineSession implements DeviceSession, ReplaceableDeviceSessio
     @Override
     public Duration getKeepAliveTimeout() {
         return Duration.ofMillis(keepAliveTimeOutMs);
-    }
-
-    @Override
-    public DeviceMessageCodec getDeviceMessageCodec() {
-        return parent.getDeviceMessageCodec();
     }
 
     @Override

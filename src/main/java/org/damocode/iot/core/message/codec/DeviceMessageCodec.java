@@ -7,5 +7,8 @@ package org.damocode.iot.core.message.codec;
  * @Version: 1.0.0
  */
 public interface DeviceMessageCodec extends DeviceMessageEncoder, DeviceMessageDecoder {
+
+    Transport getSupportTransport();
+
 }
 

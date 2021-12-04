@@ -12,6 +12,10 @@ public interface DeviceMessage extends Message {
 
     long getTimestamp();
 
+    default String getMessageId() {
+        return null;
+    }
+
     @Override
     default <T> DeviceMessage addHeader(HeaderKey<T> header, T value) {
         Message.super.addHeader(header, value);

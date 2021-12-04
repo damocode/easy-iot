@@ -10,6 +10,7 @@ import org.apache.commons.codec.binary.Hex;
 import org.damocode.iot.core.message.codec.EncodedMessage;
 import org.damocode.iot.network.tcp.TcpMessage;
 import org.damocode.iot.network.tcp.parser.PayloadParser;
+import rx.functions.Action1;
 import rx.subjects.PublishSubject;
 
 import java.net.InetSocketAddress;
@@ -120,6 +121,11 @@ public class VertxTcpClient implements TcpClient {
         return processor;
     }
 
+    @Override
+    public InetSocketAddress address() {
+        return getRemoteAddress();
+    }
+
     public Boolean sendMessage(EncodedMessage message) {
         if (socket == null) {
             log.debug("socket closed");
@@ -134,6 +140,11 @@ public class VertxTcpClient implements TcpClient {
             }
         });
         return flag.get();
+    }
+
+    @Override
+    public void disconnect() {
+        shutdown();
     }
 
     @Override
